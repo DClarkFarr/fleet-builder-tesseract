@@ -4,4 +4,5 @@ import os
 os.chdir('data')
 number_of_files = len(os.listdir('./'))
 for i in range(0, number_of_files):
-    os.system(f"tesseract eng.ocrb.exp{i}.jpg eng.ocrb.exp{i} batch.nochop makebox")
+    os.system(
+        f"tesseract eng.fleet.exp{i}.jpg eng.fleet.exp{i} batch.nochop makebox")

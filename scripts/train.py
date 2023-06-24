@@ -2,7 +2,6 @@
 # https://github.com/nguyenq/jTessBoxEditor/releases/tag/Release-2.3.1 can be used for annotating.
 
 import os
-import subprocess
 srcdir = 'data'
 destdir = 'trainfiles'
 output = 'trainoutput'
@@ -24,24 +23,31 @@ boxes = [x for x in files if x.endswith('.box')]
 trainfiles = list(zip(jpgs, boxes))
 
 # generating TR files and unicode charecter extraction
-unicharset = f"unicharset_extractor --output_unicharset {destdir}/unicharset "
+unicharset = f"unicharset_extractor --output_unicharset {destdir}/unicharset --norm_mode 3 "
 unicharset_args = f""
 errorfiles = []
 for image, box in trainfiles:
-    unicharset_args += f"{box} "
+    unicharset_args += f"{srcdir}/{box} "
+
+print(f"Generate unicharset: " + unicharset+unicharset_args[:-1])
+os.system(unicharset+unicharset_args[:-1])
+
+# Creating font properties file
+with open(f"{destdir}/font_properties", 'w') as f:
+    f.write("fleet 0 0 0 1 0")
+
+for image, box in trainfiles:
     if os.path.isfile(f"{destdir}/{image[:-4]}.tr"):
+        print(f"Existed: {destdir}/{image[:-4]}.tr")
         continue
     try:
+        print(
+            f"tesseract {srcdir}/{image} {destdir}/{image[:-4]} nobatch box.train")
         os.system(
             f"tesseract {srcdir}/{image} {destdir}/{image[:-4]} nobatch box.train")
     except:
         errorfiles.append((image, box))
 
-os.system(unicharset+unicharset_args[:-1])
-
-# Creating font properties file
-with open(f"{destdir}/font_properties", 'w') as f:
-    f.write("ocrb 0 0 0 1 0")
 
 # # Getting all .tr files and training
 trfiles = [f for f in os.listdir(destdir) if f.endswith('.tr')]
